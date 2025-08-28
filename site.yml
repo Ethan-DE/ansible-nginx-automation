@@ -1,0 +1,27 @@
+---
+- name: Configure NGINX Web Server
+  hosts: web
+  become: true
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Enable and start NGINX
+      service:
+        name: nginx
+        enabled: true
+        state: started
+
+    - name: Replace default index.html
+      copy:
+        content: "<h1>Hello from Ansible-managed server</h1>"
+        dest: /var/www/html/index.html
+
+    - name: Allow HTTP through UFW
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
