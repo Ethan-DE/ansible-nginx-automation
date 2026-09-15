@@ -1,27 +1,40 @@
 ---
-- name: Configure NGINX Web Server
+- name: Configure NGINX web server
   hosts: web
   become: true
+
   tasks:
-    - name: Install NGINX
-      apt:
-        name: nginx
+    - name: Install NGINX and UFW
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - ufw
         state: present
         update_cache: true
 
-    - name: Enable and start NGINX
-      service:
+    - name: Deploy index page
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload NGINX
+
+    - name: Allow HTTP through UFW
+      community.general.ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+    - name: Enable NGINX
+      ansible.builtin.service:
         name: nginx
         enabled: true
         state: started
 
-    - name: Replace default index.html
-      copy:
-        content: "<h1>Hello from Ansible-managed server</h1>"
-        dest: /var/www/html/index.html
-
-    - name: Allow HTTP through UFW
-      ufw:
-        rule: allow
-        port: '80'
-        proto: tcp
+  handlers:
+    - name: Reload NGINX
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
