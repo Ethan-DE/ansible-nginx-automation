@@ -1,40 +1,29 @@
-# Ansible NGINX Automation
+# NGINX with Ansible
 
-Automated provisioning of an NGINX web server on Ubuntu using Ansible.
+A small Ansible playbook for configuring NGINX on Ubuntu. The local inventory makes it easy to test on a disposable VM, while the playbook itself is written the same way I would use it against a remote host group.
 
-## Inventory
+## What it does
 
-```ini
-[web]
-localhost ansible_connection=local
+- installs NGINX and UFW
+- deploys a templated index page
+- opens port 80
+- enables and starts NGINX
+- reloads NGINX only when the page changes
 
-Playbook Structure
-Installs NGINX
+## Run
 
-Enables and starts service
+Install the required collection first:
 
-Replaces default index page
+```bash
+ansible-galaxy collection install -r requirements.yml
+```
 
-Opens HTTP port via UFW
+Then run the playbook:
 
-Usage
+```bash
 ansible-playbook -i inventory.ini site.yml
+```
 
-Requirements
+The checked-in inventory uses `localhost` with a local connection for testing. For a remote host, replace it with the target address and normal SSH inventory variables.
 
-Ubuntu-based system
-
-Ansible installed (sudo apt install ansible)
-
-Root privileges
-
-Status
-
-Tested on fresh Ubuntu 22.04 VPS with static IPv4.
-
-Author
-
-Ethan E
-Email: eradirideitie@gmail.com
-
-Open to relocation and remote DevOps roles
+A second run should report no changes unless the package state or template has changed.
